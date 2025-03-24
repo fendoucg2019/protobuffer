@@ -1,0 +1,155 @@
+syntax = "proto3";//目前用的是3.19.3版本
+option java_outer_classname = "LoginFunctionProto";
+
+//用户登录
+message MsgCsUserLogin{
+  int32  locno     = 1; //模拟器License号
+  string strid     = 2; //用户名
+  string strpasswd = 3; //密码
+  int32  ntype     = 4; //用户类型：0普通用户1关工委等级考试考生账号
+}
+
+//用户登录校准
+message MsgCsLoginUsersCheck{
+  int32           locno      = 1; //模拟器License号
+  repeated string strid      = 2; //模拟器当前登录的用户列表
+  int32           status     = 3; //模拟器当前所在状态：0(球场模式) 3(最近洞) 4(练习场) 5(切杆) 6(推杆) -1(其它)
+  int32           branch     = 4; //模拟器所在会所会所号
+  string          strVersion = 5; //模拟器的版本号
+}
+
+//用户登录校准返回
+message MsgScLoginUsersCheckAck{
+  repeated string strid = 1; //已在别的模拟器登录的用户列表
+}
+
+//用户登录返回
+message MsgScUserLoginAck{
+  int32  nret        = 1; // 登录返回值 登录返回值 【0,登录失败 1,登录成功】 2,考生未报考 3,密码不正确 4,考生不在指定考点考试 5,考生不在考试时间 6,未审核或审核不通过
+  int32  nsex        = 2; // 性别 【0,男 1,女】
+  int32  nErrorCode  = 3; //登录错误提示 0登录成功,1表示“用户或密码错误”，2表示“用户已经登录”，3表示“其它”
+  string strid       = 4; //用户id
+  string strmobile   = 5; //用户手机号
+  int32  npoint      = 6; //用户点数
+  string strimage    = 7; //用户图像绝对地址
+  string strnickname = 8;//用户昵称
+  int32  handiCap    = 9; //差点
+}
+
+//用户退出登录
+message MsgCsUserLogout{
+  string strid = 1; //用户id
+  int32  locno = 2; //本机用户的模拟器的License号
+}
+
+//强制踢人
+  message MsgScUserForceLogout{
+  string strid     = 1; //用户id
+  int32  locno     = 2; //踢掉本机用户的模拟器的License号
+  int32  outsource = 3;//退出来源，默认值或0为强制退出，1，为来自web服务器对游戏服务器的请求
+}
+
+//获取二维码内容
+message MsgCsGetQrcode{
+  int32 ntype = 1; //获取扫码登录的类型，1,获取常规扫码登录地址 2，获取原模拟器第二种的扫码地址
+  int32 locno = 2; //踢掉本机用户的模拟器的License号
+}
+
+//返回二维码内容
+message MsgScGetQrcodeAck{
+  int32  ntype      = 1; //应答获取的是哪一类型的扫码地址
+  int32  nkey       = 2; //服务器产生的随机值，用于扫码过期判断的
+  string qrcodeaddr = 3; //扫码登录的地址
+}
+
+//扫码登录
+message MsgScUserQrcodeLogin{
+  int32  nsex        = 1; //性别：0，男 1，女
+  int32  npoint      = 2; //点数
+  string strnickname = 3; //用户呢称
+  string strid       = 4; //用户id
+  string strverycode = 5; //用户验证码
+  string strmobile   = 6; //用户手机号
+  string strimage    = 7; //用户图像绝对地址
+  int32  handiCap    = 8; //差点
+}
+
+//扫码登录结果返回
+message MsgCsUserQrcodeLoginAck{
+  string strid    = 1; //用户id
+  int32  bSuccess = 2;//模拟器登录是否成功0失败，1成功
+  int32  nErrCode = 3;//错误类型（1代表当前用户不在继续比赛用户列表中，禁止登录，2代表比赛中禁止加入,3代表已登录，4代表登录满员）
+}
+
+//扫码退出登录
+message MsgScUserQrcodeLogout{
+  string strid = 1; //用户id
+  int32  locno = 2; //
+}
+
+//扫码退出登录结果返回
+message MsgCsUserQrcodeLogoutAck{
+  string strid = 1; //用户id
+  int32  res   = 2; //-1，模拟器未填值 0，退出失败 1，退出成功
+  int32  locno = 3; //本机用户的模拟器的License号
+}
+
+//用户登录校准返回(UE4新增)
+message MsgGolfjoyLoginUsersCheckAck{
+  repeated string strid = 1;        //已在别的模拟器登录的用户列表
+}
+
+//用户个性化设置
+message MsgUserPersonalSetting{
+  int32  head_frame    = 1; // 头像框 0为默认值， 1为S95专属头像
+  int32  ball_skin     = 2; // 球皮肤 0为默认值， 1为S95专属皮肤
+  int32 driver_distance = 3;//一号木推荐距离
+  int32 iron7_distance = 4;//7铁推荐距离
+}
+
+//用户账号密码登录返回
+message MsgScGolfjoyUserLoginAck{
+  int32  ret        = 1; // 登录返回值 登录返回值 【0,登录失败 1,登录成功】 2,考生未报考 3,密码不正确 4,考生不在指定考点考试 5,考生不在考试时间 6,未审核或审核不通过
+  int32  sex        = 2; // 性别 【0,男 1,女】
+  int32  error_code  = 3; //登录错误提示 0登录成功,1表示“用户或密码错误”，2表示“用户已经登录”，3表示“其它”
+  string user_id       = 4; //用户id
+  string mobile   = 5; //用户手机号
+  int32  point      = 6; //用户点数
+  string image    = 7; //用户图像绝对地址
+  string nick_name = 8;//用户昵称
+  int32 tee_type = 9;              //TEE  黑金蓝白红 12345
+  float tee_height = 10;//Tee高度
+  float distance = 11;//默认击球距离
+  int32 difficult = 12; //熟练度（新增）
+  int32 hand = 13;  //惯用手（新增）
+  int32 movie_upload = 14; //视频上传（新增）
+  int32 camera_angle = 15; //飞行视角（新增）
+  int32 greed = 16;  //推杆辅助线（新增）
+  int32 member_identity = 17;  //身份（新增）0为普通用户，1为C95，2为S95
+  int32 handicap = 18;  //差点（新增）
+  int32 balltail_type = 19;//球轨迹拖尾
+  MsgUserPersonalSetting personal_setting  = 20; //个性化设置
+}
+
+//扫码登录
+message MsgScGolfjoyUserQrcodeLogin{
+  int32  sex        = 1; //性别：0，男 1，女
+  int32  point      = 2; //点数
+  string nick_name = 3; //用户呢称
+  string user_id       = 4; //用户id
+  string verification_code = 5; //用户验证码
+  string mobile   = 6; //用户手机号
+  string image    = 7; //用户图像绝对地址
+  int32 tee_type = 8;//TEE
+  float tee_height = 9;        //Tee高度
+  float distance = 10;//默认击球距离
+  int32 difficult = 11; //熟练度（以下为新增）
+  int32 hand = 12;  //惯用手
+  int32 movie_upload = 13; //视频上传
+  int32 camera_angle = 14; //飞行视角
+  int32 greed = 15;  //推杆辅助线
+  int32 member_identity = 16;   //身份 0为普通用户，1为C95，2为S95
+  int32 handicap = 17;  //差点
+  int32 balltail_type = 18;  ////球轨迹拖尾
+  MsgUserPersonalSetting personal_setting  = 19; //个性化设置
+}

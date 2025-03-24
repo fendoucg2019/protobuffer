@@ -1,0 +1,146 @@
+syntax = "proto3";//目前用的是3.19.3版本
+option java_outer_classname = "LicenseServerProto";
+
+message MsgLicenseOnlineFirstReq{
+	 int32 type = 1; //业务类型 0：获取初始化locNo 1:生成license信息 10:g3认证设备安装golfjoy自动认证 1500：本地验证license数据错误 2100：本地验证license成功 2200：本地验证license时间错误
+	 int32 game_type = 2; //模拟器类型 201：greenjoy3 202:海外版模拟器 204：ue4
+	 repeated int32 register_data = 3;      //a_Key[10];
+	 string addr = 4; //mac地址
+	 int32 bInternational = 5;//0：标准版  1 国际版
+	 int32 demo_version = 6; //是否为演示demo版本，0为否，1为是
+	 int64 demo_end_time = 7; //演示版本到期时间，为1970年1月1日起的毫秒数
+}
+
+message MsgProductInfo
+{
+	string product_name = 1;//产品名称
+	string product_resolution = 2;//产品分辨率
+}
+
+message MsgCdkeyAuthInfo
+{
+	int32 product_id = 1;//产品 basic 1001  gold 1002
+	int64 start_time = 2;//开始时间
+	int64 end_time = 3;//结束时间
+}
+
+message MsgLicenseOnlineFirstAck{
+	int32 type = 1;
+	int32 ok = 2;
+	int32 branch_no = 3;
+	repeated int32 register_data = 4;      //a_Key[20];
+	string msg = 5;
+	int32 remain_days = 6 ;//[default = 100] License的剩余天数，默认值为100，避免默认值小于等于10。
+	int32 product_id = 7; //产品型号
+	int32 show_product = 8;
+	MsgProductInfo product_info = 9;//产品信息
+	string sensor_type_list = 10; //可用感测器类型
+	repeated MsgCdkeyAuthInfo authInfos = 11; //激活码授权时间
+	int32 international = 12; //是否为国际版
+}
+
+message MsgLicenseOnlineBranchReq{
+	 int32 random1 = 1; //服务器生成随机值
+	 int32 room_no = 2; //房间号
+	 repeated int32 register_data = 3; //a_key[20]
+	 string branch_no = 4; //会所id
+	 string passwd = 5; //会所密码
+	 string room_name = 6; //会所房间名
+}
+
+message MsgLicenseOnlineBranckAck{
+	 bool ok = 1; //绑定结果
+	 string msg = 2; //绑定消息
+}
+
+message MsgLicenseOnlineAutoChangeReq{
+	int32 type = 1;
+	repeated int32 register_data = 2;    //a_Key[20];
+	string msg = 3;
+}
+
+message MsgLicenseOnlineSystemInfoReq{
+	 int32 type = 1; //业务类型
+	 int32 license_version = 2; //licenseVersion
+	 string cpu = 3; //cpu
+	 string os = 4; //操作系统
+	 string vga = 5; //显卡
+	 string hard_driver = 6; //硬盘
+	 string sensor = 7; //感测器
+	 string net_card1  = 8; //网卡1
+	 string net_card2  = 9; //网卡2
+	 string net_card3  = 10; //网卡3
+}
+
+//激活码激活
+//SLIMID_CDKEY_ACTIVE_REQ
+message MsgCdkeyActiveReq{
+	string cd_key = 1;
+}
+
+//SLIMID_CDKEY_ACTIVE_RSP
+message MsgCdkeyActiveRsp{
+	int32 errorCode = 1; //绑定结果 0：成功 1:产品型号不一致（标准版）
+	string errorMsg = 2; //绑定消息
+	int32 key_type = 3; //激活码类型 0:设备型号延期  1：地图或功能延期
+}
+
+
+//更改房间名
+message MsgUpdateRoomNameReq{
+	string room_name = 1;
+}
+
+//更改房间名返回
+message MsgUpdateRoomNameAck
+{
+	int32 ret = 1;
+	string room_name = 2 ;
+}
+
+//更改sdk version
+message MsgUpdateSensorSdkVersionReq{
+	 string sensor_name = 1; //感测器名称
+	 string sdk_version = 2; //感测器Sdk版本
+	 string sensor_version = 3; //感测器固件版本
+}
+
+//获取会所与房间信息返回 1005
+message MsgGetRoomBranchInfoAck{
+	int32 room_no  = 1;     //模拟器的房间号（新增）
+	string room_name = 2;   //模拟器的房间名（新增）
+	int32 branch_no   = 3;  //模拟器的会所号（新增
+	string branch_name = 4;   //模拟器的会所名（新增）
+}
+
+//上传模拟器版本号 1006
+message MsgSimulatorVersion{
+	string ver = 1; //模拟器版本号
+}
+
+//上传模拟器版本号返回 1007
+message MsgSimulatorVersionAck{
+	string last_ver = 1; //最新的版本号
+	repeated string update_logs = 2; //更新日志
+}
+
+//固件升级
+//SLIMID_GET_FIRMWARE_UPDATE_REQ  2000   查询固件是否需要升级
+message MsgGetFirmwareUpdateReq{
+	string sensor_version = 1; //sensor版本号
+	int32 sensor_type = 2; //sensor类型
+}
+
+message MsgGetFirmwareUpdateAck{
+	int32  bupdate = 1; //是否有新版本
+	string sensor_version = 2; //可更新sensor版本号
+	string sensor_version_desc = 3; //版本详情
+}
+
+//SLIMID_IGNORE_FIRMWARE_VERSION_REQ  2002   设置该固件版本不升级
+message MsgIgnoreFirmwareVersionReq{
+	string sensor_version = 1; //忽略的sensor版本号
+	int32 sensor_type = 2; //忽略的sensor类型
+}
+
+//SLIMID_IGNORE_FIRMWARE_VERSION_Ack  2003   没有消息体

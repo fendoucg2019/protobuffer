@@ -1,0 +1,963 @@
+syntax = "proto3";//目前用的是3.19.4版本
+option java_outer_classname = "GolfjoyServerProto";
+//100没有消息体
+
+//获取击球视频上传配置返回 103
+message MsgGetOssConfigForMyshotRsp{
+	string access_id = 1;
+	string access_key = 2;
+	string endpoint = 3;
+	string bucket_name = 4;
+	string base_path = 5;
+}
+
+//104没有消息体
+message MsgGetFeedbackQRCodeReq{
+}
+
+
+//用户反馈二维码url返回 105
+message MsgGetFeedbackQRCodeRsp{
+	string url = 1;
+}
+
+message MsgContentInfo{
+	string item = 1;
+	string content= 2;//内容
+}
+
+message MsgNoteInfo{
+	int32 note_id = 1; //1:用户协议 2：隐私策略
+	string note_tittle = 2; // 标题
+	int32 launguage_type = 3;//语言类型 0:中文 1：英文
+	repeated MsgContentInfo content_list = 4;
+}
+
+//106 获取golfjoy文本
+message MsgGetGolfjoyNoteReq{
+}
+
+
+//107 获取golfjoy文本返回
+message MsgGetGolfjoyNoteRsp{
+	repeated MsgNoteInfo note_list = 1;
+}
+
+
+//功能管理相关
+message MsgFunctionLicenseAuth{
+	int32 function_id = 1; //功能ID
+	int32 parent_function_id = 2; //父功能ID
+	string function_name = 3; //功能名
+	int64 expire_time    = 4; //授权终止时间
+	int32 state = 5; //授权状态  0：隐藏 1：固定  2：购买 3: 锁定
+	int32 trial_state = 6; //试用状态 0：可试用 1：不可试用
+	int64 trial_end_time = 7; //试用截止时间
+}
+
+//获取设备功能授权列表 300 SGMID_GET_FUNCTION_LICENSE_AUTH_REQ
+message MsgGetFunctionLicenseAuthReq{
+}
+
+//获取设备功能授权列表返回 301 SGMID_GET_FUNCTION_LICENSE_AUTH_RSP
+message MsgGetFunctionLicenseAuthRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	repeated MsgFunctionLicenseAuth auth_list = 3;
+}
+
+//功能开始试用 304 SGMID_FUNCTION_TRIAL_START_REQ
+message MsgFunctionTrialStartReq{
+	int32 function_id = 1; //功能编号
+}
+
+//功能开始试用返回 305 SGMID_FUNCTION_TRIAL_START_RSP
+message MsgFunctionTrialStartRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	int32 function_id = 3;//功能ID
+	int64 trial_end_time = 4; //试用截止日期
+}
+
+//功能解锁推送 306 SGMID_SEND_FUNCTION_UNLOCK
+message MsgUnlockFunction{
+	repeated MsgFunctionLicenseAuth auth_list = 1;
+}
+
+//1000没有消息体
+
+//支付相关
+//购买球场url返回 1001
+message MsgGetCourseBuyUrlRsp{
+	string url = 1;
+}
+
+//1002没有消息体
+
+//返回商城链接  SGMID_GET_STORE_URL_RSP 1005
+message MsgGetStoreUrlRsP{
+	string store_url = 1;   //商城url
+	string gold_url = 2;    //黄金版售卖url
+	string basic_url = 3;   //基础版售卖url
+	string other_url = 4;   //地图或者功能售卖url
+}
+
+
+//1004没有消息体
+
+//获取国际版商店url返回 1005
+message MsgGetFuncBuyUrlRsp{
+	string url = 1;
+}
+
+//地图相关
+//地图名称，简介，所有和语音相关项
+message MsgCourseLaunguageInfo{
+	int32 launguage_type = 1;//语言类型
+	string course_name_show = 2;//显示名称
+	string course_name_sort = 3;//排序名称
+	string course_describe = 4;//简介
+}
+
+//地图信息
+message MsgCourseInfo{
+	int32  course_no      = 1; //球场ID
+	string map_no         = 2; //真实地图编号
+	repeated MsgCourseLaunguageInfo info_list= 3;//球场名称简介  根据EGjLanguageType顺序存储
+	float  altitude = 4;//球场海拔
+	int32  course_style   = 5; //球场风格ECourseStyle
+	int32  course_type = 6;//球场类型ECourseType 这个字段需要和g3保持一致，可能需要再看看具体怎么定义兼容
+	int32  region           = 7; //地区ECourseRegion
+	int32  difficulty     = 8; //难度 1-5
+	int32  hole_num           = 9; //洞数
+	int32  par            = 10; //总标准杆
+	string hole_ids       = 11; //真实地图球洞编号
+	int32  red_distance = 12; //红Tee总距离
+	int32  total_distance = 13; //总距离
+	int64 release_time    = 14; //地图发布时间
+	string course_logo = 15; //地图logo,默认不设置，设置的时候名称为文件MD5值
+	string course_preview = 16; //地图预览图,默认不设置，设置的时候名称为文件MD5值
+	int32  info_version = 17; //地图详情版本
+}
+
+//地图授权与版本信息
+message MsgCourseLicenseAuth{
+	int32  course_no   = 1; //球场ID
+	int32 hot_rate = 2;    //热度
+	int32  version = 3 ; //球场最新版本
+	string md5 = 4 ; //文件md5值
+	int32 state = 5; //授权状态   0：隐藏  1:固定 2：选定（指在配置球场中属性为选定的球场被选中的，不被选中的为锁定） 3：购买 4：锁定
+	int64 expire_time    = 6; //购买授权终止时间
+	int32 trial_state = 7; //授权状态   0：不可试用 1：可以试用
+	int64 trial_end_time = 8; //试用截止时间
+	int64 file_size = 9 ; //文件大小 字节数
+	int32 course_mode = 10;//球场模式 0 常规球场 1 其他（练习场，小游戏)
+}
+
+message MsgCourseInfoVersion{
+	int32  course_no = 1; //球场ID
+	int32  info_version = 2; //球场详情版本
+}
+
+message MsgCourseInfoVersionList{
+	repeated MsgCourseInfoVersion course_version_list = 1;
+}
+
+
+//更新地图详情 2000 SGMID_GET_COURSE_LIST_REQ
+message MsgGetCourseListReq{
+	repeated int32 language_list = 1;
+	repeated MsgCourseInfoVersion course_version_list = 2;
+}
+
+//更新地图详情返回 2001 SGMID_GET_COURSE_LIST_RSP
+message MsgGetCourseListRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	string base_path = 3; //地图图片路径
+	repeated MsgCourseInfo course_list = 4; //地图详情列表
+}
+
+//获取地图语言内容包 2002 SGMID_GET_COURSE_LANGUAGE_REQ
+message MsgGetCourseLanguageReq{
+	repeated int32 language_list = 1;
+}
+
+message MsgCourseLanguage{
+	int32  course_no      = 1; //球场ID
+	repeated MsgCourseLaunguageInfo language_list = 2; //语言列表
+}
+
+//获取地图语言内容包返回 2003 SGMID_GET_COURSE_LANGUAGE_RSP
+message MsgGetCourseLanguageRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	repeated MsgCourseLanguage language_list = 3; //语言列表
+}
+
+// 获取地图授权与地图版本信息 2004 SGMID_GET_COURSE_AUTH_REQ
+message MsgGetCourseAuthReq{
+	string current_version = 1;
+}
+
+//获取地图授权与地图版本信息返回 2005 SGMID_GET_COURSE_AUTH_RSP
+message MsgGetCourseAuthRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	repeated MsgCourseLicenseAuth auth_list = 3; //授权详情
+	int32 course_version_min = 4;//版本支持的地图的最低版本
+	int32 course_version_max = 5;//版本支持的地图的最高版本
+}
+
+//更新个人地图版本信息 2006 SGMID_UPDATE_COURSE_LOG_REQ
+message MsgUpdateCourseLogReq{
+	int32 course_no = 1;
+	int32 type = 2; // 0:地图上传 1:地图修改 2：地图删除 3：地图激活 4：地图发布 5：客户端地图下载 6:客户端地图安装  7:客户端地图更新
+	int32 current_version = 3;
+	int32 download_version = 4;
+}
+
+//更新个人地图版本信息返回 2007 SGMID_UPDATE_COURSE_LOG_RSP
+
+
+//地图开始试用 2008 SGMID_COURSE_TRIAL_START_REQ
+message MsgCourseTrialStartReq{
+	int32 course_no = 1; //球场编号
+}
+
+//地图开始试用返回 2009 SGMID_COURSE_TRIAL_START_RSP
+message MsgCourseTrialStartRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	int32 course_no = 3;
+	int64 trial_end_time = 4; //试用截止日期
+}
+
+//地图权限解锁推送 2109 SGMID_UNLOCK_COURSE
+message MsgUnlockCourse{
+	repeated MsgCourseLicenseAuth auth_list = 1;
+}
+
+
+//用户相关
+//设置用户打球习惯信息 3000
+message MsgSetMemberHabitReq{
+	string member_id = 1;		//用户id
+	int32 tee = 2; //tee类型
+	float tee_height = 3; //tee高度
+	float distance = 4; //默认距离
+	string member_nick = 5; //昵称
+	int32 difficult = 6;	//难度
+	int32 hand = 7; //左右手
+	int32 is_movie_upload = 8;	//是否上传视频
+	int32 camera_angle = 9;	//摄像头角度
+	int32 is_greed_open = 10;	//是否开启推杆辅助线
+	int32 ball_tail_type = 11;  //球轨迹拖尾
+}
+
+//3001没有消息体
+
+//查询游戏财富值，包括金币道具等 3002
+message MsgGetWealthReq
+{
+	repeated string user_list = 1;
+}
+
+//财富结构体
+message MsgWealth
+{
+	string member_id = 1;
+	int64 total_coins = 2;
+}
+
+//查询游戏财富值返回 3003
+message MsgGetWealthRsp
+{
+	repeated MsgWealth wealth_list = 1;
+}
+
+
+//更改用户个性化设置 3004
+message MsgSetUserPersonSettingReq{
+	string member_id   = 1;	 //用户id
+	int32  head_frame   = 2;  // 头像框 0为默认值
+	int32  ball_skin    = 3;  // 球皮肤 0为默认值
+	int32 driver_distance = 4;//一号木推荐距离
+	int32 iron7_distance = 5;//7铁推荐距离
+}
+
+//3005没有消息体
+
+//组队信息
+message MsgTeamInfo{
+	string member_id = 1;//用户id
+	string team_id = 2;//队伍id 0表示没有组队，有效队伍号是1-4
+}
+
+//开始比赛 4000 MsgGolfJoyCsGameStart
+message MsgGameStartReq{
+	string game_mark_no  = 1; //场次唯一标识
+	repeated MsgTeamInfo user_list = 2; //参与用户
+	int32 game_model = 3;//游戏模式
+	int32 course_no  = 4; //地图no
+	int32 tournament_no = 5; //比赛no
+	int32 start_hole  = 6; //起始洞
+	int32 hole_ea = 7; //洞模式 9洞或18洞
+	int32 battle_id = 8; //联网对战房间号
+	string course_name = 9;//球场名字
+	int64 msg_time = 10; //开始时间
+}
+
+//4001没有消息体
+
+//结束比赛 4002 MsgGolfJoyCsGameEnd
+message MsgGameEndReq{
+	string game_mark_no  = 1;
+	int32 game_model = 2;
+	int32 end_type =3 ;
+	int64 msg_time = 4; //结束时间
+}
+
+//4003没有消息体
+
+//击球数据 	MsgGolfJoyShootInfo
+message MsgGolfJoyShootInfo{
+	float speed = 1;//球速
+	float club_speed = 2;//杆速
+	float degree = 3;//仰角
+	float lr_degree = 4;//左右偏角
+	float side_spin = 5;//侧旋
+	float back_spin = 6;//后旋
+}
+
+//杆头数据 	MsgGolfJoyClubInfo
+message MsgGolfJoyClubInfo{
+	int32 club_type = 1;//杆类型
+	float face_to_path = 2;//杆头朝向
+	float path_angle = 3;//杆头轨迹
+	float attack_angle = 4;//攻击角度
+	float point_x = 5;//击球点偏侧
+	float point_y = 6;//击球点高度
+	float club_face_angle = 7;//杆面角InTrack.SensorClubData.ClubFaceToPathAngle + InTrack.SensorClubData.ClubPathAngle
+}
+
+
+//三维数组 MsgGolfJoyVector3D
+message MsgGolfJoyVector3D{
+	float x = 1;
+	float y = 2;
+	float z = 3;
+}
+
+//球位置状态
+message MsgGolfJoyBallVector3{
+	float time = 1;//时间
+	MsgGolfJoyVector3D location = 2;//在模拟器中的位置，绝对位置
+}
+
+//球场模式 MsgBallTrack
+//球场模式每一杆数据 MsgGolfJoyBallTrack
+message MsgGolfJoyBallTrack{
+	int32 track_index = 1; //该洞第几杆
+	MsgGolfJoyShootInfo shoot_info = 2; //击球详情
+	MsgGolfJoyVector3D spring_arm_start_rotation = 3; //弹簧臂初始方向
+	MsgGolfJoyVector3D drop_center = 4; //抛弃中心
+	int32 is_drop_penalty = 5;//抛球是否罚杆
+	MsgGolfJoyBallVector3 start_vec3 = 6;//起点坐标
+	MsgGolfJoyBallVector3 fall_vec3 = 7;//落点坐标
+	MsgGolfJoyBallVector3 end_vec3 = 8;//停点坐标
+	string video_save_path = 9;//视频保存路径
+	int32 has_qj = 10;//是否有全景视频
+	int32 on_tee = 11;//是否在Tee位
+	float driving_distance = 12;//总距离
+	float remain_distance = 13;//剩余距离
+	float carry_distance = 14;//飞行距离
+	int32 location_start = 15;//开始区域
+	int32 location_end = 16;//结束区域
+	MsgGolfJoyClubInfo club_info = 17; //杆头数据
+}
+
+//发送球场模式数据，带轨迹4004
+message MsgSendCourseShootTrack{
+	string game_mark_no = 1;//场次唯一标识
+	string player_id = 2;  //用户id
+	int32 tournament_id = 3;// 比赛ID 比赛ID为负数的时候表示没有比赛
+	int32 course_no = 4;//球场号
+	int32 hole_num = 5;//球洞号
+	MsgGolfJoyBallTrack tracks = 6;//轨迹
+	int64 msg_time = 7; //击球时间
+}
+
+//4005没有消息体
+
+//练习场模式
+message MsgPracticeBallTrack{
+MsgGolfJoyShootInfo shoot_info = 1; //击球详情
+        MsgGolfJoyBallVector3 start_vec3 = 2;//起点坐标
+        MsgGolfJoyBallVector3 fall_vec3 = 3;//落点坐标
+        MsgGolfJoyBallVector3 end_vec3 = 4;//停点坐标
+        float driving_distance =5;//总距离
+        float remain_distance = 6;//剩余距离
+        float carry_distance = 7;//飞行距离
+        float middle_Offset = 8;//中线偏移
+        float max_height = 9; //最大高度
+        int32 location_start = 10;//开始区域
+        int32 location_end = 11;//结束区域
+        MsgGolfJoyClubInfo club_info = 12; //杆头数据
+        MsgGolfJoyShootInfoEx shoot_info_ex = 13;//击球详情的衍生数据
+        float bounce_dis = 14;//弹跳距离
+        float center_line_dis = 15;//中线上的距离
+        float spin_dis = 16;//旋转距离
+        float land_angle = 17;//落地角
+        float hang_time = 18;//滞空时间
+}
+
+//击球数据衍生的数据,可以通过击球数据直接计算出来
+message MsgGolfJoyShootInfoEx{
+        float total_spin = 1;//总旋转
+        float spin_axis = 2;//旋转轴
+        float smash_factor = 3;//击球效率
+}
+
+//发送练习场模式数据，带轨迹4006
+message MsgGolfJoyPraticeScoreTa{
+	string player_id = 1;//玩家id
+	string game_mark_no = 2;//标识符
+	int32 course_no = 3;//球场号
+	MsgPracticeBallTrack shoot_info = 4; //击球详情
+	int32 club_no = 5;//杆编号
+	int32 on_tee = 6;//是否在Tee位
+	int64 msg_time = 7;//击球时间
+}
+
+//4007没有消息体
+
+//切杆模式与切推模式
+//切杆与切推模式每一杆数据
+message MsgClipingBallTrack{
+	MsgGolfJoyShootInfo shoot_info = 1; //击球详情
+	MsgGolfJoyBallVector3 start_vec3 = 2;//起点坐标
+	MsgGolfJoyBallVector3 fall_vec3 = 3;//落点坐标
+	MsgGolfJoyBallVector3 end_vec3 = 4;//停点坐标
+	float driving_distance =5;//总距离
+	float remain_distance = 6;//剩余距离
+	float carry_distance = 7;//飞行距离
+	int32 location_start = 8;//开始区域
+	int32 location_end = 9;//结束区域
+}
+
+//发送切杆与切推模式数据，带轨迹4008，4010
+message MsgSendClipingShootTrack{
+	string game_mark_no = 1;//场次唯一标识
+	string player_id = 2;  //用户id
+	int32 tournament_id = 3;// 比赛ID 比赛ID为负数的时候表示没有比赛
+	int32 course_no = 4;//球场号
+	int32 hole_num = 5;//球洞号
+	MsgClipingBallTrack tracks = 6;//轨迹
+	MsgGolfJoyVector3D hole_vec3 = 7;//洞杯坐标
+	int64 msg_time = 8; //击球时间
+}
+
+//4009，4011没有消息体
+
+//推杆模式4012
+message MsgSendPuttingShoot{
+	string game_mark_no = 1;//场次唯一标识
+	string player_id = 2;  //用户id
+	int32 tournament_id = 3;// 比赛ID 比赛ID为负数的时候表示没有比赛
+	int32 hole_type = 4;//洞杯类型 1:1号洞杯 2:2号洞杯 3:3号洞杯
+	int32 is_inhole = 5;//0:未进洞 1：进洞
+	int64 msg_time = 6; //击球时间
+}
+
+//4013没有消息体
+
+//一洞的成绩 //MsgHoleScore
+message MsgGolfJoyCsHoleScore{
+	string player_id = 1;  //用户id
+	int32 hit_count = 2;//打了几杆
+	int32 mulligan_count = 3;//摸杆数
+	int32 putting_count = 4;//推了几杆
+	int32 tee = 5;//tee位
+	int32 is_give_up = 6;//是否弃洞
+	float hole_dis = 7;//总距离
+}
+
+//所有用户打完本洞，发送该消息更新数据 结束一洞数据 MsgFinishHoleReq4014
+message MsgGolfJoyCsFinishHole{
+	string game_mark_no = 1;//gameID
+	int32 course_no = 2;//球场号
+	int32 hole_num = 3;//球洞号
+	int32 par = 4;//标准杆
+	int32 cup = 5;//洞杯位
+	repeated MsgGolfJoyCsHoleScore score_list = 6;
+	int32 type_wind = 7;//风速
+	float green_speed = 8;//果岭速度
+	float free_push_radius = 9;//免推距离
+	int64 msg_time = 10; //结束时间
+}
+
+//4015没有消息体
+//小游戏结算一个人
+message MsgGolfJoyGamescore
+{
+	string player_id = 1;//玩家ID
+	int64 score = 2;//积分
+	int32 level = 3;//通关数
+	int64 gain_coins = 4;//获取金币
+	int32 hit_count = 5;//总杆数
+}
+
+//上传小游戏结算成绩，根据消息ID确认具体消息4016
+message MsgGolfJoySendGameScore
+{
+	string game_mark_no = 1;//标识符
+	int32 game_model = 2;//游戏模式
+	int32 level_model = 3;//游戏子模式
+	repeated MsgGolfJoyGamescore score_list = 4;
+	string match_code = 5;
+	int64 msg_time = 6; //结束时间
+}
+
+//4017没有消息体
+
+//击球视频上传 4018 MsgGolfJoyMovieFile
+message MsgSaveMovieFileReq{
+	string game_mark_no  = 1;//一场游戏的唯一ID
+	string member_id = 2;//玩家ID
+	int32 hole = 3;//球洞号
+	int32 tournament_no = 4;//比赛号
+	int32 course_no = 5;//球场号
+	int32 mode = 6;//模式
+	int32 track_index = 7;//第几杆
+	int32 score_type = 8;//视频类型0啥也不是1一杆进洞2信天翁3老鹰4小鸟
+	int32 update_type = 9;//上传方式0自动上传1手动上传
+	string img_file = 10;//视频封面图片名
+	string movie_file = 11;//视频文件名
+	int32 qjyn = 12;//是否有全景视频，0表示无 1表示有
+	string qj_movie_file = 13;//全景视频文件名
+	int32 is_hd = 14;//是否是高清视频
+	int64 msg_time = 15; //击球时间
+}
+
+//4019没有消息体
+
+//用户打完本洞，发送该消息更新数据 结束一洞数据 MsgFinishHoleReq4020
+message MsgGolfJoyCsPuttingFinishHole{
+	string game_mark_no = 1;//gameID
+	int32 tournament_id = 2;// 比赛ID 比赛ID为负数的时候表示没有比赛
+	int32 course_no = 3;//球场号
+	int32 hole_num = 4;//球洞号
+	string player_id = 5;  //用户id
+	int32 hit_count = 6;//打了几杆
+	int64 msg_time = 7; //洞结束时间
+}
+
+//4021没有消息体
+
+//用户中途加入游戏 4022
+message MsgUserJoinHalfwayReq
+{
+	string game_mark_no = 1;
+	int32 game_model = 2;
+	string player_id = 3;
+	int32 score_type = 4; //2:double par 3：trible par  99:99杆
+	int64 msg_time = 5; //开始时间
+	int32 hit_hole = 6; //当前比赛打了几个洞
+	int32 start_hole = 7; //开始洞
+}
+
+//4023没有消息体
+message MsgUserJoinHalfwayRsp
+{
+	int32 error_code = 1;
+	string error_desc = 2;
+	string player_id = 3;
+	repeated int32 hit_count_list = 4;
+	repeated int32 score_list = 5;//得分表
+}
+
+//用户中途退出游戏 4024
+message MsgUserQuitGameReq{
+	string game_mark_no  = 1;
+	int32 game_model = 2;
+	string player_id = 3;
+	int64 msg_time = 4; //结束时间
+}
+
+//4025没有消息体
+
+message MsgLuckyShooterShot
+{
+	int32 index = 1;
+	int32 target_type = 2;
+	int32 score = 3;
+}
+//幸运射手杆数据保存 4026
+message	MsgSaveLuckyShooterShotReq{
+	string game_mark_no  = 1; //场次唯一标识
+	string member_id = 2; //用户id
+	repeated MsgLuckyShooterShot shot_list= 3;//列表
+	int64 msg_time = 4; //击球时间
+}
+//4027没有消息体
+
+//幸运射手历史数据查询 SGMID_GET_LUCKY_SHOOTER_HISTORY_REQ 4028 没有消息体
+
+//幸运射手历史数据查询响应 SGMID_GET_LUCKY_SHOOTER_HISTORY_RSP 4029
+message MsgMinigameHistoryInfo
+{
+	int32 loc_no = 1; //设备号
+	int64 game_no = 2; //标识场次
+	string room_name = 3; //房间名
+	string match_code = 4;//活动密码 0：单机 其他：活动
+	string member_id = 5;//用户ID
+	string nick_name = 6;//用户昵称
+	string member_image = 7;//用户头像
+	int32  head_frame = 8; // 头像框 0为默认值， 1为S95专属头像
+	int32 total_score = 9;//成绩
+	repeated MsgLuckyShooterShot shot_list = 10; //每一杆成绩
+	int64 end_time = 11; //结束时间
+}
+
+message	MsgGetLuckyShooterHistoryRsp{
+	repeated MsgMinigameHistoryInfo history_list = 1;//userList
+}
+
+//长打王
+//长打王杆数据
+message MsgLongDriveShot
+{
+	int32 index = 1;
+	int32 score = 2;
+}
+
+//长打王杆数据保存 4030
+message  MsgSaveLongDriveShotReq{
+	string game_mark_no  = 1; //场次唯一标识
+	string member_id = 2; //用户id
+	repeated MsgLongDriveShot shot_list= 3;//列表
+	int64 msg_time = 4; //击球时间
+}
+
+//长打王历史数据查询 消息体不存在 4032
+message MsgLongDriveHistoryInfo
+{
+	int32 loc_no = 1; //设备号
+	int64 game_no = 2; //标识场次
+	string room_name = 3; //房间名
+	string match_code = 4;//活动密码 0：单机 其他：活动
+	string member_id = 5;//用户ID
+	string nick_name = 6;//用户昵称
+	string member_image = 7;//用户头像
+	int32  head_frame = 8; // 头像框 0为默认值， 1为S95专属头像
+	int32 best_score = 9;//成绩
+	repeated MsgLongDriveShot shot_list = 10; //每一杆成绩
+	int64 end_time = 11; //结束时间
+}
+//长打王历史数据返回查询 4033
+message MsgGetLongDriveHistoryRsp{
+	repeated MsgLongDriveHistoryInfo history_list = 1;//userList
+}
+
+//比赛相关信息  5000 MsgGolfJoyCsGetTournament MsgGolfJoyCsGetTournament
+message MsgGolfJoyCsGetTournament{
+	int32 nLocno = 1;
+	int32 nBranchNo = 2;
+	int32 nType = 3;
+}
+
+message MsgCSPutRaceHoleScore{
+	string player_id = 1;  //用户id
+	int32 hit_count = 2;//打了几杆
+	int32 score = 3;//得分
+}
+
+//推杆游戏所有用户打完本洞，发送该消息更新数据
+//msgGameStartReq 4034
+message MsgCSPutRaceFinishHole{
+	string game_mark_no = 1;//gameID
+	int32 course_no = 2;//球场号
+	int32 hole_num = 3;//球洞号
+	int32 par = 4;//标准杆
+	int32 level_mode = 5;//游戏级别
+	repeated MsgCSPutRaceHoleScore score_list = 6;
+	int64 msg_time = 7; //结束时间
+	string match_code = 8;//活动匹配密码
+}
+//推杆游戏洞数据更新返回
+//SGMID_SAVE_PUTRACE_HOLE_DATA_RSP 4035
+
+//推杆游戏历史记录查询请求
+//SGMID_GET_PUTRACE_HISTORY_REQ 4036
+//无包体
+
+//推杆游戏历史数据记录结构
+message MsgPutRaceHistoryInfo
+{
+	int32 loc_no = 1; //设备号
+	int64 game_no = 2; //标识场次
+	string room_name = 3; //房间名
+	string match_code = 4;//活动密码 0：单机 其他：活动
+	string member_id = 5;//用户ID
+	string nick_name = 6;//用户昵称
+	string member_image = 7;//用户头像
+	int32  head_frame = 8; // 头像框 0为默认值， 1为S95专属头像
+	int32 best_score = 9;//成绩
+	int32 shot_count = 10; //总杆数
+	int64 end_time = 11; //结束时间
+	int32 level_mode = 12;//游戏难度
+}
+
+//推杆游戏历史数据查询返回
+//SGMID_GET_PUTRACE_HISTORY_RSP 4037
+message MsgGetPutRaceHistoryRsp
+{
+	repeated MsgPutRaceHistoryInfo history_list = 1;//userList
+}
+
+//MsgGolfJoyTournamentOption
+message MsgGolfJoyTournamentOption{
+	int32 nTeeMan = 1;
+	int32 nTeeWoman = 2;
+	int32 nDifficultMan = 3;
+	int32 nDifficultWoman = 4;
+	int32 nMulligan = 5;
+	float fConcede = 6;
+	int32 nWind = 7;
+	int32 nHolePutting = 8;
+	int32  bGreed = 9;
+	int32  nPlayRuleType = 10;
+	int32  bUpdateVideo = 11;
+	int32 nCupNum = 12;
+	int32  bDoublePar = 13;
+	float fGreenSpeed = 14;
+	int32 playSort = 15; //击球顺序 0为默认规则，1为进洞轮询，2为果岭等待
+}
+
+//MsgGolfJoyTournamentInfo5001
+message MsgGolfJoyTournamentInfo{
+	int32 nTmtNo = 1;
+	string tnName = 2;
+	int32 nBranchNo = 3;
+	int32 nTmtType = 4;
+	int32 nTmtHoleType = 5;
+	int32 courseNo = 6;
+	int32 holeNo = 7;
+	int32 nTmtState = 8;
+	string iMageurl = 9;
+	string tN_period_s = 10;
+	string tN_period_e = 11;
+	int32 nTnOrder = 12;
+	MsgGolfJoyTournamentOption option = 13;
+	map<int32, MsgGolfJoyTournamentDescInfo> desc_info_map = 14;
+	int32 way_type = 15;
+	int32 participants = 16;
+	int32 new_type = 17;//新老类型（0 老赛事  1 新赛事）
+	int32 is_apply = 18;//是否需要报名（0 无需报名  1 需要报名）
+	int32 proficiency_level = 19;//熟练度（1：新手 2：业余 3：职业）
+}
+
+//赛事不同语言的描述信息
+message MsgGolfJoyTournamentDescInfo{
+	string name = 1;//赛事名称
+	string slogan = 2;//赛事广告语
+	string img_thumb_url = 3;//缩略图url
+	string img_detail_url = 4;//详情图url
+	string img_rule_url = 5;//规则图url
+	string img_reward_url = 6;//奖励图url
+	string rank_url = 7;//排行二维码url
+	string apply_url = 8;//报名二维码url
+}
+
+//获取比赛返回5001
+message MsgGolfJoyScGetTournamentAck{
+	int32 hasData = 1;
+	repeated MsgGolfJoyTournamentInfo tnList = 2;
+}
+
+//5002
+message MsgGolfJoyCsGetTournamentDetailUrl {
+	int32 nLocno = 1;
+}
+
+//5003
+message MsgGolfJoyScGetTournamentDetailUrlAck {
+	string url = 1;
+}
+
+//加入赛事校验5004
+message MsgJoinTournamentVerify{
+	int32 nTmtNo = 1;//比赛号
+	int32 nLocNo = 2;//设备号
+	int32 nBranchNo = 3 ;//球馆号
+	repeated string userList = 4;//登录玩家
+	int32 msgVer = 5;//消息版本号，默认-1代表老版本，1代表增加地图权限判断，2代表防作弊新版本
+	int32 nCamCnt = 6;//客户端启用的摄像头的个数（如果个数小于2，代表未启用防作弊摄像头）
+}
+
+//单个玩家的验证信息
+message MsgUserTournamentVerifyInfo{
+	string strID = 1;
+	int32 nOK =2;
+	int32 nRemainHitCnt = 3;
+	int32 nErrorcode = 4;//1参赛次数达到上限 2未报名，请先扫码报名比赛 ,3代表已被禁赛
+	string strErrorMsg = 5;
+}
+
+//加入赛事校验返回消息5005
+message MsgJoinTournamentVerifyAck{
+	int32 nTmtNo = 1;
+	repeated MsgUserTournamentVerifyInfo userList = 2;
+	int32 nOK = 3;//0 not ok 1 ok
+	int32 nErrorcode = 4;//1赛事不存在 2 有用户不满足参赛条件 3 地图未授权  4请开启防作弊摄像头
+	string strErrorMsg = 5;
+}
+
+//获取临时授权列表 5006 SGMID_GET_TEMPORARY_AUTH_REQ
+message MsgGetTemporaryAuthReq{
+}
+
+message MsgFunctionTemporaryAuth{
+	int32 function_id = 1; //功能ID
+	int32 parent_function_id = 2; //父功能ID
+	string function_name = 3; //功能ID
+}
+
+message MsgTemporaryAuth{
+	repeated int32 course_list = 1; //球场ID
+	repeated MsgFunctionTemporaryAuth function_list = 2; //功能id
+	string limit_version = 3; //最低版本
+	int64 start_time = 4; //授权起始时间
+	int64 expire_time = 5; //授权终止时间
+	repeated int32 other_course_list = 6; //其他类型（练习场、小游戏）球场ID
+}
+
+//获取临时授权列表返回 5007 SGMID_GET_TEMPORARY_AUTH_RSP
+message MsgGetTemporaryAuthRsp{
+	int32 error_code = 1;
+	string error_desc = 2;
+	repeated MsgTemporaryAuth auth_list = 3;
+}
+
+//获取财富榜6000
+message MsgGetWealthRankReq
+{
+	int32 type = 1;//0 总金币
+	repeated string user_list = 2;
+}
+
+//获取财富榜返回6001
+message MsgGetWealthRankRsp
+{
+	int32 type = 1;//0 总金币
+	repeated MsgGolfJoyRankInfo wealth_list = 2;
+}
+
+//获取游戏的排名6002
+message MsgGolfJoyGetGameRankInfo
+{
+	int32 game_model = 1;//游戏模式
+	int32 level_model = 2;//游戏子模式
+	int32 rank_type = 3;//0 总金币  1 积分  2 通关 3 单局金币
+	int32 month_recent = 4;//最近第几个月，0表示当月
+	repeated string user_list = 5;//游戏某个模式的排行列表，当前登录玩家一定包含且在最前
+	int32 rank_item = 6; //0:总排名 1：会所排名
+}
+
+//获取游戏排名信息,一般为单局结算的最大值排名
+message MsgGolfJoyRankInfo
+{
+	string member_id = 1;//用户ID
+	string nick_name = 2;//用户昵称
+	string member_image = 3;//用户头像
+	int64 rank_value = 4 ;//用户金币/积分、通关数等的具体值
+	int32 rank_no = 5;//用户排名
+	int32 head_frame  = 6;//头像框
+	repeated int32 sub_value_list = 7;//子值列表，方便扩展, 例如推杆游戏，子值是总杆数，
+}
+
+//返回小游戏排行6003
+message MsgGolfJoyGameRankRsp
+{
+	int32 game_model = 1 ;//游戏模式 跳一跳  碰碰堂  开心炸弹
+	int32 level_model = 2;//游戏关卡模式 海岛/沙漠   标准场/娱乐
+	int32 rank_type = 3;//  1 积分  2 通关 3 单局金币
+	int32 month_recent = 4;//最近第几个月，0表示当月
+	repeated MsgGolfJoyRankInfo game_rank_list = 5;//userList最前面+前20
+	int32	rank_item = 6; //0:总排名 1：会所排名
+}
+
+//获取球场的排名6004
+message MsgGolfJoyGetCourseUserRankInfo
+{
+	int32 game_model = 1;//游戏模式
+	int32 course_no = 2;//球场号
+}
+
+//获取球场用户的排名 6005
+message MsgGolfJoyCourseRankRsp
+{
+	int32 game_model = 1;//游戏模式
+	int32 course_no = 2;//球场号
+	repeated MsgGolfJoyRankInfo course_rank = 3;//前10
+}
+
+//排名提升
+message MsgGolfJoyRankRaised
+{
+	string member_id = 1;//用户ID
+	int32 raised_no = 2;//提升的排名数
+	int64 rank_value = 3 ;//用户金币/积分、通关数等的具体值
+	int32 rank_no = 4;//用户排名
+}
+
+//游戏的排名提升6007
+message MsgGolfJoyCourseRankRaisedAck
+{
+	int32 game_model = 1;//游戏模式
+	int32 level_model = 2;//游戏关卡模式 海岛/沙漠   标准场/娱乐
+	int32 rank_type = 3;//0 总金币  1 积分  2 通关 3 单局金币
+	int32 month_recent = 4;//最近第几个月，0表示当月
+	int32 course_no = 5;//球场号
+	repeated MsgGolfJoyRankRaised user_rank_list = 6;//userList最前面
+}
+
+//广告结构体 子结构
+//广告结构体 子结构
+message MsgAdvertisement{
+	int32 ad_id = 1;//广告ID号  0表示替换默认广告 大于零为正常的广告
+	int32 tournament_no = 2;//广告赛事号 -1 表示非赛事
+	int32 loc_no = 3;//广告设备号  -1 表示所有  0表示指定当前设备，不指定当前设备的广告不会返回
+	int32 branch_no = 4;//球会id       -1表示所有球会   0表示指定了当前球会，不指定当前球会的广告不会返回
+	int32 course_no = 5;//球场号      -1表示所有球场   非0表示指定的球场号
+	int32 ad_version = 6;//广告版本   每次广告配置被修改的时候这个值会自增
+}
+
+//系统参数
+//获取广告资源列表xml返回 101
+message MsgGetCourseAdListRsp{
+	int32 ret = 1;//0表示隐藏所有广告  1 表示显示默认广告  2显示当前网络设定的广告
+	string base_url = 2;//下载广告的根目录
+	repeated MsgAdvertisement ad_list = 3;//广告的列表
+}
+
+
+//参赛用户请求信息
+message MsgCompetitorReq{
+	int32 nTmtNo = 1; //比赛号
+	repeated string user_list = 2;//参赛用户详情
+}
+//参赛用户返回信息
+message MsgCompetitorRsp{
+	int32 nTmtNo = 1; //比赛号
+	repeated MsgCompetitorInfo competitor_list = 2;//参赛用户详情
+}
+//参赛用户详情
+message MsgCompetitorInfo {
+	string member_id =1 ;//用户id
+	int32 member_sex = 2; //用户性别 0，男 1，女
+	string member_nick = 3;//用户昵称
+	int32 tee = 4;//参赛用户tee
+	int32 is_enroll = 5;//是否报名 0：否 1：是
+}

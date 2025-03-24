@@ -1,0 +1,35 @@
+socketinfo:
+   test_server_ip: 120.76.138.211
+   produc_server_ip: 120.76.117.111
+   addspeed_id:
+   America_socket: k8s-default-golfonli-2612729d2c-185621aeb5116f7a.elb.us-east-1.amazonaws.com
+   America_udp: k8s-default-golfonli-d66e2d3689-f9dc48d80208473d.elb.us-east-1.amazonaws.com
+   Europe_socket: ac69f854202544c9696af54a104461d9-af994caa2fd0f410.elb.eu-central-1.amazonaws.com
+   Europe_udp: ab251dd9fef634d66a34bd07e0166cbf-f61b91f8d45dffa9.elb.eu-central-1.amazonaws.com
+   socket_port: 19999
+   udp_port: 29999
+
+TestUser:
+   strid: 109099
+   locno: 103492
+   pswod: 12345678
+   nickname: zz
+
+ProducUser:
+   strid: 381354  #336972
+   locno: 15102
+   pswod: 12345678
+   nickname: abc
+
+AmericaUser:
+   #strid: zhaoweiping@golfonline.cn
+   strid: 275925
+   locno: 403512
+   pswod: 12345678
+   nickname: a6
+
+EuropeUser:
+   strid: 274942
+   locno: 500057
+   pswod: 12345678
+   nickname: highly
